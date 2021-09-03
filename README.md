@@ -24,17 +24,12 @@ time-series data.
 The project is written for categorical input data of the following form:
 
 
- user_ID sequence_ID eventData_1 eventData_2 eventData_3
-1    8509           1       cat_1           8          10
-2    8509           1       cat_2           8          10
-3    8509           1       cat_3           8          10
-4    8509           1       cat_4           8          10
-5    8509           1       cat_5           8          10
-6    8509           1       cat_6           8          10
+user_ID     sequence_ID     eventData_1     eventData_2     eventData_3
 
 user_ID -> self-explanatory
 
-sequence_ID -> indicates which events belong to the same sequence (a user has several sequences)
+sequence_ID -> indicates which events belong to the same sequence (a user has several sequences
+usually)
 
 eventData_X -> categorical event data, if not already integer encoded, write it into 
 COVARIATES_TO_TRANSLATE in config.py
