@@ -1,0 +1,4 @@
+Copyright (C) Stefan Vamosi - All Rights Reserved
+Unauthorized copying of this file, via any medium is strictly prohibited
+Proprietary and confidential
+Written by Stefan Vamosi <stefan@vamosi.org>, September 2021
