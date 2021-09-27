@@ -210,7 +210,7 @@ class dataprep():
 
         # prepare triplet tensor to fed into model training
         # if more than one file, prepare the tensor accordingly
-        triplet_tensor = np.zeros(((users_per_file * self.triplets_per_user),
+        triplet_tensor = np.zeros(((users_per_file * triplets_per_user),
                                             self.sequence_len_max, 3 * len(self.covariates_all)), dtype='int32')
 
         # index for main triplet tensor over all triplets and users
@@ -218,7 +218,7 @@ class dataprep():
         for indx, user in enumerate(data_list):
             if indx % 1000 == 0:
                 print('{} of {} users'.format(indx, len(data_list)), "\r")
-            for _ in range(self.triplets_per_user):
+            for _ in range(triplets_per_user):
                 if len(user) > 1:
                     anchor, positive = random.sample(list(user), 2)
 
@@ -260,7 +260,7 @@ class dataprep():
                     print('Save data chunk'.format(indx, " of ", len(data_list)), "\r")
                     pickle.dump(self.triplet_tensor, open(directory + "triplet_file_usergroup" + str(indx), 'wb'),
                                 protocol=4)
-                    triplet_tensor = np.zeros(((users_per_file * self.triplets_per_user),
+                    triplet_tensor = np.zeros(((users_per_file * triplets_per_user),
                                                self.sequence_len_max, 3 * len(self.covariates_all)), dtype='int32')
                     indx_in = 0
 
