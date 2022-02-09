@@ -6,7 +6,7 @@ Unauthorized copying of this file, via any medium is strictly prohibited
 Proprietary and confidential
 Written by Stefan Vamosi <stefan@vamosi.org>, September 2021.
 
-Results created with this model was recently published by: Vamosi, Reutterer, Platzer under the name: A deep recurrent neural network approach to learn sequence similarities for user-identification in the Decision Support Systems journal, https://doi.org/10.1016/j.dss.2021.113718
+Results created with this model was recently published by: Stefan Vamosi, Thomas Reutterer and Michael Platzer, A deep recurrent neural network approach to learn sequence similarities for user-identification, Decision Support Systems, https://doi.org/10.1016/j.dss.2021.113718
 
 
 This is a sequence similarity model. It is able to learn similarities between sequences,
