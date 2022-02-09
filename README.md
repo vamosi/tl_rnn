@@ -13,6 +13,8 @@ is trained, it is able to translate an input sequence into a vector. This embedd
 representation reflects the property of the sequence and the distance to other sequences
 reflects their commonalities. 
 
+<figure><img src="images/Sample_Draw_runningexample.png"><figcaption>image caption</figcaption></figure>
+
 Under the hood the model consists of an Embedding layer and an LSTM layer trained on a triplet
 loss (contrastive loss). This way, the model learns what is similar inside the same user
 and what differentiate a user from others. This way it can cover frequencies, time-dependancies
