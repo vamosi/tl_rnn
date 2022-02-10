@@ -32,31 +32,30 @@ The model consists of an Embedding layer, an LSTM layer trained on a triplet los
 
 The model weights are shared across the three channels (anchor, positive and negative). After training, a sequence can be translated into an embedding vector, which coordinates reflect its sequential properties. 
 
-The number of dimension of the embedding space object is equal to the number of LSTM cells. The number of cells represents the capacity of the model and always corresponds with the complexity of the data. Although high capacities tend to overfit in general, I suggest to choose a sufficiently large number of weights in order to receive precise positions of sequences. The risk of overfitting is relaxed by the validation loss monitor that is by default used in the training procedure. For the original publication the number of cells was 512, which is very high. Consider that the total number of weights increase non-linearly with the number of cells, due to the fully-connectionism between Embedding and LSTM layer. 
+The number of dimension of the embedding space object is equal to the number of LSTM cells. The number of cells represents the capacity of the model and always corresponds with the complexity of the data. Although high capacities tend to overfit in general, I suggest to choose a sufficiently large number of weights in order to receive precise positions of sequences. The risk of overfitting is relaxed by the validation loss monitor that is by default used in the training procedure. For the original publication the number of cells was 512, which is very high. Consider that the total number of weights increase non-linearly with the number of cells, due to the fully-connectionism between Embedding- and LSTM-layer. 
 
-However, the Embedding layer is important to reduce the input vector from a one-hot-encoding with the number of components equal to the cardinality of the input category, to a much lower dimensional real valued vector. Also, the embedding layer is able to capture associations between similar events, e.g. in a customer retail context, the events "Purchase at BP" and "Purchase at Shell" would share strong associations with each other, due to their interchangeability and common appearance within a sequence. Hence, these events would be close inside the Embedding space layer. Please don not confuse this Embedding layer with the embedding ability of the TL-RNN (event embedding vs. sequence embedding).
+However, the Embedding layer is important to reduce the input vector from a one-hot-encoding with the number of components equal to the cardinality of the input variable, to a much lower dimensional real valued vector. Also, the embedding layer is able to capture associations between similar events. E.g., in a customer retail context the events "purchase at BP" and "purchase at Shell" would share strong associations with each other, due to their interchangeability and common appearance within a sequence. Hence, these events would be close inside the Embedding space layer. Please do not confuse this Embedding layer embedding with the embedding ability of the TL-RNN as a whole (event embedding vs. sequence embedding).
 
 
-This can be used to re-identify users, based on behavioral data, or to cluster (segment)
-time-series data.
+The model can be used to re-identify, embedd or cluster all sorts of sequential data, like behavioral event data (shopping paths, browsing behavior, geographic paths, etc.).
 
-In the project example we use sequential data with three different covariates of categorical events:
+A project example is being provided and sequential data is being provided as sequential_data.csv. The data set provides time-series events of different individuals with different sequences each. Three different event types (covariates) were observed to each event.
 
 
 user_ID | sequence_ID | eventData_1 | eventData_2 | eventData_3
 
+The dimensions in detail:
 
 user_ID -> unique user ID
 
-sequence_ID -> running sequence index: indicates which events belong to the same sequence (a user has several sequences
-usually)
+sequence_ID -> running sequence_ID per user_ID: indicates which events belong to the same sequence (a user has several sequences
+usually). This choice is usually arbitrary, but must be defined beforehand. You can either define it with a fixed time frame (day, week, month) or with a fixed number of events per sequence. In both cases, provide a sequence_ID when used with your data.
 
-eventData_X -> categorical event data, if not already integer encoded, write it into 
-COVARIATES_TO_TRANSLATE in config.py. There a rank-based encoding takes place, translating the most common event type into 1 and counts upwards. If the cardinality of a variable exceeds the *MAX_CARDINALITY* parameter in *config.py* then the rare events are put into a bin (others).
+eventData_X -> categorical event data, if not already integer encoded, write it into *COVARIATES_TO_TRANSLATE* in *config.py*. Then, a rank-based integer encoding takes place, translating the most common event type as "1" with rarer events upwards. If the cardinality of a variable exceeds the *MAX_CARDINALITY* parameter in *config.py* then the rare events are put into a bin (others).
 
 A full example for training and inference is programmed as run.py.
 
-There, a holdout is created and evaluated in an re-identification task on triplets 
+There, a holdout set is being created and evaluated in an re-identification task on triplets. 
 
 
 Hardware and Software requirements:
