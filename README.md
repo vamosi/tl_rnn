@@ -13,9 +13,8 @@ Results that were created with this model were recently published by: Stefan Vam
 
 The TL-RNN code package represents a generic deep neural-network-based framework for quantifying the similarity of ordered sequences in event histories. It combines an LSTM network layer with a triplet loss cost function used for network training. It yields an embedding space that serves as a similarity metric for complex sequential data, can handle multivariate sequential data and incorporate covariates.
 
-<figure><img src="images/running_example_seqs.png"><figcaption>The motivation behind the TL-RNN: From image similarity to sequence similarity. Sequential user behavior is like a signature, characteristic patterns distinguish individuals from each other. Taken from (Vamosi, Reutterer, Platzer)</figcaption></figure>
+<figure><img src="images/running_example_seqs.png"><figcaption>The motivation behind the TL-RNN: From image similarity to sequence similarity. Sequential user behavior is like a signature, characteristic patterns distinguish individuals from each other. Taken from (Vamosi, Reutterer, Platzer)</figcaption></figure>\
 
-<br />
 
 In contrast to approaches that rely on hand-engineered similarity metrics, TL-RNN allows to derive: (i) a purely data-driven sequence similarity metric based on subject-level characteristics, (ii) automatically associating co-occurring events within a sequence (network embedding layer), and (iii) to effectively incorporate any number of covariates for such similarity. Potentially, the model is able to consider all sorts of sequential characteristics, that is specifically: frequency, order, number of events, and co-/occuring event signals.
 
@@ -41,24 +40,26 @@ However, the Embedding layer is important to reduce the input vector from a one-
 This can be used to re-identify users, based on behavioral data, or to cluster (segment)
 time-series data.
 
-The project is written for categorical input data of the following form:
+In the project example we use sequential data with three different covariates of categorical events:
 
 
-user_ID     sequence_ID     eventData_1     eventData_2     eventData_3
+user_ID | sequence_ID | eventData_1 | eventData_2 | eventData_3
+
 
 user_ID -> unique user ID
 
-sequence_ID -> indicates which events belong to the same sequence (a user has several sequences
+sequence_ID -> running sequence index: indicates which events belong to the same sequence (a user has several sequences
 usually)
 
 eventData_X -> categorical event data, if not already integer encoded, write it into 
-COVARIATES_TO_TRANSLATE in config.py
+COVARIATES_TO_TRANSLATE in config.py. There a rank-based encoding takes place, translating the most common event type into 1 and counts upwards. If the cardinality of a variable exceeds the *MAX_CARDINALITY* parameter in *config.py* then the rare events are put into a bin (others).
 
-You can see an example run in the run.py, which is considering the attached sequential data
+A full example for training and inference is programmed as run.py.
 
 There, a holdout is created and evaluated in an re-identification task on triplets 
 
-Hardware and Software requirements
+
+Hardware and Software requirements:
 
 Make sure you have Python, Keras and Tensorflow running. The project was developed on:
 
