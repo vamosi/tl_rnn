@@ -16,6 +16,7 @@ The TL-RNN code package represents a generic deep neural-network-based framework
 <figure><img src="images/running_example_seqs.png"><figcaption>The motivation behind the TL-RNN: From image similarity to sequence similarity. Sequential user behavior is like a signature, characteristic patterns distinguish individuals from each other. Taken from (Vamosi, Reutterer, Platzer)</figcaption></figure>
 
 
+
 In contrast to approaches that rely on hand-engineered similarity metrics, TL-RNN allows to derive: (i) a purely data-driven sequence similarity metric based on subject-level characteristics, (ii) automatically associating co-occurring events within a sequence (network embedding layer), and (iii) to effectively incorporate any number of covariates for such similarity. Potentially, the model is able to consider all sorts of sequential characteristics, that is specifically: frequency, order, number of events, and co-/occuring event signals.
 
 The triplet loss is based on the idea, that similarity should be learned from co-occurring patterns within a users' history. It is a way to contrast individuals with each other, in order to learn their specific similarities and differences. The triplet learning procedure, in the case of sequences with TL-RNN, is visualized in the following image: 
