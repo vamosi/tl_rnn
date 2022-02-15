@@ -95,8 +95,8 @@ class tlrnn():
         self.sequence_len_max = SEQUENCE_LEN_MAX
         self.take_last_actions = TAKE_LAST_ACTIONS
         self.cells = cells
-        self.model_train = Model()
-        self.model_pred = Model()
+        self.model_train = None
+        self.model_pred = None
         self.epoch_max = EPOCHS
         self.model_path = MODEL_PATH
         self.tensorboard_path = TENSORBOARD_PATH
@@ -140,7 +140,6 @@ class tlrnn():
         it prints the number of users that were skipped, because they had only one sequence
         yields a list for one trainings batch
         """
-        # prepare triplet tensor to fed into model training
         user_list = list(range(0, len(data_list)))
         while True:
             skipping_count = 0
@@ -201,15 +200,15 @@ class tlrnn():
         """
         # replace self.sequence_length with None
         output_dims = [embedding_dim_heuristic(dim) for dim in list(self.cov_dims)]
-        input_layer = [Input(shape=(self.sequence_len_max, 1)) for _ in range(3*self.cov_num)] #[Input(shape=(None, 1)) for _ in range(3*self.cov_num)]
-        embedding_layer = [TimeDistributed(Embedding(output_dim=output_dims[idx], input_dim=list(self.cov_dims)[idx])) for idx in range(self.cov_num)]
+        input_layer = [keras.layers.Input(shape=(self.sequence_len_max, 1)) for _ in range(3*self.cov_num)] #[Input(shape=(None, 1)) for _ in range(3*self.cov_num)]
+        embedding_layer = [keras.layers.TimeDistributed(Embedding(output_dim=output_dims[idx], input_dim=list(self.cov_dims)[idx])) for idx in range(self.cov_num)]
 
         connected_layer = []
 
         for idx, val in enumerate(input_layer):
             connected_layer.append(embedding_layer[idx%self.cov_num](val))
 
-        reshaped_layer = [Reshape((-1, output_dims[idx%self.cov_num]),
+        reshaped_layer = [keras.layers.Reshape((-1, output_dims[idx%self.cov_num]),
                                   name = "reshape_0"+str(idx))(val) for idx, val in enumerate(connected_layer)]
 
         if self.cov_num==1:
@@ -217,11 +216,11 @@ class tlrnn():
             pos = reshaped_layer[self.cov_num:(2*self.cov_num)]
             neg = reshaped_layer[(2*self.cov_num):(3*self.cov_num)]
         else:
-            anchor = concatenate(reshaped_layer[0:self.cov_num])
-            pos = concatenate(reshaped_layer[self.cov_num:(2*self.cov_num)])
-            neg = concatenate(reshaped_layer[(2*self.cov_num):(3*self.cov_num)])
+            anchor = keras.layers.concatenate(reshaped_layer[0:self.cov_num])
+            pos = keras.layers.concatenate(reshaped_layer[self.cov_num:(2*self.cov_num)])
+            neg = keras.layers.concatenate(reshaped_layer[(2*self.cov_num):(3*self.cov_num)])
 
-        lstm1 = LSTM(units=self.cells, stateful=False, return_sequences=True, name="lstm_1", return_state=True)
+        lstm1 = keras.layers.CuDNNLSTM(units=self.cells, stateful=False, return_sequences=True, name="lstm_1", return_state=True)
 
         out1, state_h1, state_c1 = lstm1(anchor)
         out2, state_h2, state_c2 = lstm1(pos)
@@ -229,8 +228,8 @@ class tlrnn():
 
         out = concatenate([state_c1, state_c2, state_c3])
 
-        self.model_train = Model(input_layer, [out])
-        self.model_pred = Model(input_layer[0:self.cov_num], [state_c1])
+        self.model_train = keras.Model(input_layer, [out])
+        self.model_pred = keras.Model(input_layer[0:self.cov_num], [state_c1])
 
     def load(self, path):
         """

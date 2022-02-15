@@ -63,7 +63,7 @@ class dataprep():
             i += 1
         print("DATAFRAME COLUMNS ", list(self.dataframe.columns))
         print("SEQ_LEN_MAX" + '\033[95m', self.sequence_len_max)
-        print("TOP 20 Categories of all Covariates", self.ranks[:20])
+        print("TOP 20 Categories of all Covariates", self.ranks[0][:20])
         print("COVARIATES_ALL" + '\033[95m', self.covariates_all)
         print("SAMPLES PER USER", self.triplets_per_user)
         print("SEQUENCE LENGTH MAX", self.sequence_len_max)
@@ -93,9 +93,13 @@ class dataprep():
         if (cov in self.ranks[cov_index]) and (self.ranks[cov_index].index(cov) <= self.max_card):
             out = self.ranks[cov_index].index(cov)
         else:
-            out = self.ranks[cov_index].index("(other)")
-            self.flag_overwrite = True
-            self.overwritten.append(cov)
+            if "(other)" in self.ranks: #sometimes "(other)" is not in the ranks list already, e.g. when for train set full cardinality available
+                out = self.ranks[cov_index].index("(other)")
+                self.flag_overwrite = True
+                self.overwritten.append(cov)
+            else:
+                out = len(self.ranks[cov_index])+1 # if (other) not already in list, e.g. in train set, put it on last pos
+                self.overwritten.append(cov)
         return out
 
     def preprocessor(self):
@@ -172,7 +176,7 @@ class dataprep():
                 for feature in self.cov_number:
                     if max(seq[:, feature]) > max_array[feature]:
                         max_array[feature] = max(seq[:, feature])
-        max_array = max_array + 1
+        max_array = max_array + 2 # +2 because account for zeros (no action) and for (others) even when not in train_set
 
         self.cardinalities = dict(zip(self.covariates_all, max_array.tolist()))
         print(self.cardinalities)
@@ -190,7 +194,7 @@ class dataprep():
         input:  data_list coming from dataprep.preprocessor()
                 If datalist from external, put it in here, otherwise data_list from object is taken
 
-        return: verwrite self.triplet_tensor
+        return: write self.triplet_tensor
         """
 
         if triplets_per_user is None:

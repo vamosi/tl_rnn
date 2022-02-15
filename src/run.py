@@ -12,7 +12,12 @@ import random
 from model import tlrnn
 from dataPrep import dataprep
 import pickle
+import tensorflow as tf
 
+
+print("tensorflow:")
+tf.test.is_gpu_available( cuda_only=False, min_cuda_compute_capability=None )
+print("end tensorflow")
 
 """
 define directory for data
@@ -27,9 +32,10 @@ read dataframe and get rid of NA's
 df = pd.read_csv(directory + "sequential_data_train.csv", verbose=True)
 df = df.fillna(0)
 
-
+df = df.iloc[:50000,:] ############ !!!!!!! test
 """
 create dataprep object. in this object all hyperparameters for dataprocessing and sampling are stored
+please double check all parameters in config.py before running it
 """
 dataobj = dataprep(dataframe=df, id_name="user_ID", sequence_id = "sequence_ID")
 
@@ -55,6 +61,8 @@ read column-like dataframe and get rid of NA's
 df_test = pd.read_csv(directory + "sequential_data_test.csv")
 df_test = df_test.fillna(0)
 
+df_test = df_test[:50000] #!!!!!!!!!!!!!!!!! test
+
 
 """
 create dataprep object for model test validation
@@ -66,6 +74,15 @@ dataobj_test = dataprep(dataframe=df_test, id_name="user_ID", sequence_id = "seq
 run preprocessor and bring datframe into propper list-like data structure for sampler
 """
 dataobj_test.preprocessor()
+
+
+"""
+VERY IMPORTANT!!
+
+Overwrite the feature encodings (rank-based) with the ones from the training set
+Otherwise training and test are encoded differently and the predicitve power gets bad
+"""
+dataobj_test.ranks = dataobj.ranks
 
 
 """
