@@ -10,8 +10,6 @@ from keras.engine import Model
 from keras.layers import *
 from keras.callbacks import TensorBoard, LearningRateScheduler, EarlyStopping, ModelCheckpoint
 
-#!!!!!!!!!!important!!!!!!!!!!!!!!!!
-# here set config file (config, config_Gfk, etc.)
 from config import OPTIMIZER, EPOCHS, SEQUENCE_LEN_MAX, \
                    MODEL_PATH, BATCH_SIZE, \
                    TENSORBOARD_PATH, PATIENCE, VALID_SPLIT, BATCHES_PER_USER, TAKE_LAST_ACTIONS
@@ -223,7 +221,7 @@ class tlrnn():
             pos = concatenate(reshaped_layer[self.cov_num:(2*self.cov_num)])
             neg = concatenate(reshaped_layer[(2*self.cov_num):(3*self.cov_num)])
 
-        lstm1 = CuDNNLSTM(units=self.cells, stateful=False, return_sequences=True, name="lstm_gpu", return_state=True)
+        lstm1 = LSTM(units=self.cells, stateful=False, return_sequences=True, name="lstm_1", return_state=True)
 
         out1, state_h1, state_c1 = lstm1(anchor)
         out2, state_h2, state_c2 = lstm1(pos)
@@ -255,10 +253,6 @@ class tlrnn():
         tensorboard = self.tensorboard_path + run_name
 
         callbacks = [TensorBoard(log_dir=tensorboard, histogram_freq=0, write_graph=True, write_images=True)]
-        # callbacks.append(LearningRateScheduler(lr_scheduler))
-        #callbacks.append(EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=self.patience, verbose=1, mode='auto'))
-        #callbacks.append(ModelCheckpoint('./logs/' + run_name + '/weights.hdf5', monitor = 'val_loss', verbose = 1,
-        #                                 save_best_only = False, save_weights_only = False, mode = 'auto', period = 1))
         callbacks.append(ModelCheckpoint('./logs/' + run_name + '/weights.{epoch:04d}.hdf5', monitor = 'val_loss', verbose = 1,
                                          save_best_only = False, save_weights_only = True, mode = 'auto', period = 1))
 
@@ -279,10 +273,10 @@ class tlrnn():
         """
         Default training scheme: generator training
         For each epoch fresh samples are drawn by triplet_generator
-        After each epoch, the validation loss is monitored by an out-of-sample validation set
+        After each epoch, the validation error is monitored for early stopping:
         Training stops if validation loss does not improve for patience epoch
-        Additionally the customized Callback: MyCallback_test tests the model after each epoch
-        regarding its re-identification strength (anchor-positive assignment) on a test set of your choice
+        Additionally, the Callback: MyCallback_test validates the model after each epoch
+        on an external test set that was not used for training and validation
         """
 
         if data_file is None:
@@ -349,35 +343,6 @@ class tlrnn():
         )
         print('training complete!')
 
-    def train_file_generator(self, run_name=None, directory=None, alpha=None, number_of_user=None):
-
-        self.model_train.compile(optimizer=self.optimizer, loss=loss_wrapper(alpha=alpha, beta=self.beta, gamma=self.gamma, cells=self.cells))
-        print(self.model_train.summary())
-
-        newpath = self.model_path + run_name
-        if not os.path.exists(newpath):
-            os.makedirs(newpath)
-        tensorboard = self.tensorboard_path + run_name
-
-        callbacks = [TensorBoard(log_dir=tensorboard, histogram_freq=0, write_graph=True, write_images=True)]
-        # callbacks.append(LearningRateScheduler(lr_scheduler))
-        callbacks.append(
-            EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=self.patience, verbose=1, mode='auto'))
-        callbacks.append(ModelCheckpoint('./logs/' + run_name + '/weights.hdf5', monitor='val_loss', verbose=1,
-                                         save_best_only=True, save_weights_only=False, mode='auto', period=1))
-        # callbacks.append(MY_CALLBACK())
-
-        self.model_train.fit_generator(
-            self.file_generator(directory=directory, number_of_users_per_file=1000),
-            epochs=self.epoch_max,
-            verbose=1,
-            steps_per_epoch=(number_of_user),
-            # class_weight=NULL,
-            workers=8,
-            initial_epoch=0,
-        )
-        print('training complete!')
-
 
     def evaluate(self, triplet_tensor=None):
         """
@@ -406,17 +371,6 @@ class tlrnn():
         print("score L1: ", self.score_L1)
 
 
-#mymodel = tlrnn()
-#tensor_training = datafromfile("data/triplet_tensor_top10k_itt_100k_restruct")
-
-#tensor_pos = tensor_training.clip(min=0)
-
-#mymodel.build()
-
-#run_name= "test"
-#alpha=10
-
-#mymodel.train(run_name=run_name, tensor_train=tensor_pos, alpha=alpha)
 
 tf.test.is_gpu_available( cuda_only=False, min_cuda_compute_capability=None )
 

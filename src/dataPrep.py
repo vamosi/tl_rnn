@@ -19,8 +19,8 @@ class dataprep():
     """
     dataprep class to prepare dataframe to readable tensor of numbers for effective sampling in model class
     input datafram has to be column-wise dataset with id-column defined with id_name in config file like:
-    "id_name" | feature 1 | feature 2 | ....
-    232324    | clickA    | value10   | ....
+    "id_name" | "sequence_id" | feature 1 | feature 2 | ....
+    232324    |      1        | click_A   | value_10  | ....
     ......
     """
     def __init__(self, dataframe = None, id_name = None, sequence_id = "week_number"):
@@ -135,11 +135,12 @@ class dataprep():
                 for col in self.covariates_all:
                     # covariates_need to be translated according ranked-based-encoding, always reserve 0 for no data (end of observation)
                     if col in self.covariates_to_translate:
-                        week_array[:, self.covariates_all.index(col)] = \
-                            np.asarray(self.vectorized_convert(df_id_t.as_matrix(columns=[col]), self.covariates_to_translate.index(col)) + 1).reshape(-1)
+                        if col in self.covariates_to_translate:
+                            week_array[:, self.covariates_all.index(col)] = \
+                                np.asarray(self.vectorized_convert(df_id_t[[col]].values, self.covariates_to_translate.index(col)) + 1).reshape(-1)
                     # loop through all other features and write them directly to array
                     else:
-                        week_array[:, self.covariates_all.index(col)] = np.asarray(df_id_t.as_matrix(columns=[col]) + 1).reshape(-1)
+                        week_array[:, self.covariates_all.index(col)] = np.asarray(df_id_t[[col]].values + 1).reshape(-1)
                 tensor_list.append(week_array)
             self.data_list.append(tensor_list)
             self.machine_id_list.append(machine_id)
