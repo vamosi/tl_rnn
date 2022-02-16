@@ -50,7 +50,7 @@ The model can be used to re-identify, embedd or cluster all sorts of sequential 
 
 The model has to be trained on a training data-set that consists of sequential data from individuals. For each user several sequences should be available, but not necessarily for all of them. 
 
-Most of the parameters for training and inference is parameterized in the *config.py*:
+Most of the parameters for training and inference are defined in the *config.py* file:
 
 *OPTIMIZER*: Defines the optimizer (usually Adam) and the learning rate [STRING]
 
@@ -87,11 +87,10 @@ Constructor for dataprep class requires two parameters (beside the dataframe):
 *user_ID*: Name of the user_ID column in the dataframe. [STRING]
 *sequence_ID*: Name of the sequence_ID column to form sequences. [STRING]
 
-There, the static hyperparameters of the model are set (Not the alpha value that defines the push-pull relation of the triplet loss. This has to be tuned during training). Each user that has at least two existing sequences is used BATCHES_PER_USER x BATCH_SIZE times as an anchor user. In each iteration, a negative sample from another user is drawn randomly to build the triplet. All users are canditates as negatives.
 
+**REAL DATA EXAMPLE**
 
-
-A project example is being provided and sequential data is being provided as sequential_data.csv. The data set provides time-series events of different individuals with different sequences each. Three different event types (covariates) were observed to each event.
+A project example is being provided in the data Folder with sequential data of individuals, called sequential_data.csv. The data set provides time-series events of different individuals with several sequences each. Three different event types (covariates) were observed to each event. The columns are:
 
 
 user_ID | sequence_ID | eventData_1 | eventData_2 | eventData_3
@@ -103,19 +102,17 @@ user_ID: unique user ID
 sequence_ID: running sequence_ID per user_ID, indicates which events belong to the same sequence (a user has several sequences
 usually). This choice is usually arbitrary, but must be defined beforehand. You can either define it with a fixed time frame (day, week, month) or with a fixed number of events per sequence, the model only needs the sequence_ID and nothing else.
 
-eventData_X -> categorical event data, if not already integer encoded, write it into *COVARIATES_TO_TRANSLATE* in *config.py*. Then, a rank-based integer encoding takes place, translating the most common event type as "1" with rarer events upwards. If the cardinality of a variable exceeds the *MAX_CARDINALITY* parameter in *config.py* then the rare events are put into a bin (others).
+eventData_X -> categorical event data, if not already integer encoded, write it into *COVARIATES_TO_TRANSLATE* in *config.py*. Then, a rank-based integer encoding takes place. It translates the most common event type as "1" and ranks rarer events upwards. If the cardinality of a variable exceeds the *MAX_CARDINALITY* parameter in *config.py*, then the rare events are put into a bin called "(others)".
 
-A fully commented example as a jupyter notebook and also as a .py is prepared for training and inference: run.py (python script) and run.ipynb (jupyter notebook). I highly recommend to take the jupyter notebook and run it step-wise for a better understanding.
+ATTENTION: Use the same encoding for training and for test data. Either encode the data (rank-based) before the split or overwrite in the test dataprep object the ranks member with the one that was used for training (dataobj_test.ranks = dataobj.ranks).
+
+Code to train and run the model is in the repo contained: A run.py (python script) and a run.ipynb (jupyter notebook). There, training and inference is shown. I highly recommend to take the jupyter notebook and run it step-wise for a better understanding.
 
 The sequential data set is placed in the data-folder. Additionally, the data is already split into training and test data set. 
 
-*******************************************************MOST IMPORTANT MODEL PARAMETERS**********************************************************************
+If you want higher accuracies, optimize the model hyperparameters (especially alpha).
 
-
-
-
-
-******************************************************Hardware and Software requirements******************************************************************
+**Hardware and Software requirements**
 
 Make sure you have Python, Keras and Tensorflow running on your environment. For this repository the following software stack was used (use the same to be on the safe side for compatibality. An upgrad to tensorflow 2.X might require some software changes):
 
@@ -123,6 +120,8 @@ Python 3.7
 Keras 2.1.6
 Tensorflow 1.15
 CUDA 10.0
+
+
 
 GPU: NVIDIA TITAN V 12GB
 
