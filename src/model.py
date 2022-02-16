@@ -69,11 +69,6 @@ def loss_wrapper(alpha, beta, gamma, cells):
         distance_0_minus = compute_manhatten_distance(y_pred[:, 0:cells],
                                                       y_pred[:, (2*cells):(3*cells)], axis_to_reduce=1)
         result = tf.maximum(((gamma*distance_0_plus) - (beta*distance_0_minus) + alpha), 0)
-        #mask = k.less(result, alpha)
-        #result = tf.multiply(result, tf.cast(mask, tf.float32))
-        #inverted_mask = tf.logical_not(mask)
-        #to_add = tf.multiply(tf.cast(alpha, tf.float32), tf.cast(inverted_mask, tf.float32))
-        #result = result + to_add
         return result
     return triplet_loss
 
@@ -239,7 +234,7 @@ class tlrnn():
 
     def train(self, run_name=None, tensor_train=None, alpha=None):
         """
-        Standard training scheme: read in one training tensor tensor_train created by dataprep.sampler
+        Standard training scheme: read in one training tensor: tensor_train created by dataprep::sampler
         In the current setup all epochs are saved to a model file without validation loss. Can be tested manually
         """
         print("compile model...")
@@ -367,7 +362,7 @@ class tlrnn():
             counter += 1
 
         self.score_L1 = count_pos_manh/counter
-        print("score L1: ", self.score_L1)
+        print("Re-Identification Score (Triplet comparison) on Holdout-set (L1-norm): ", self.score_L1)
 
 
 

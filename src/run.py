@@ -114,24 +114,27 @@ alpha=1.0
 run_name = "my_run_01"
 
 
-"""
-generator model: draws samples from dataobj automatically
-define test_set manually from test set above for re-identification evaluation on hold-out
-"""
-my_tlrnn.train_generator(run_name=run_name, alpha=alpha, test_set=dataobj_test.triplet_tensor)
-
 
 """
-generator model: draws samples from dataobj automatically
-define test_set manually from test set above for re-identification evaluation on hold-out
+Now, let's embedd a sequence into an embedding vector with length of cells:
 """
+# take a single sequence out of the holdout data set
+single_seq = dataobj_test.data_list[0][0]
+# check if sequence is not longer than our model was trained for
+if len(single_seq[:,0]) > my_tlrnn.sequence_len_max:
+    raise Exception("Input sequence is longer than seq-len-max. Shorten the sequence and repeat.")
 
-alpha=10.0
-run_name = "my_run_02"
+"""
+zero-padding of the sequence to bring it to the nominal sequence length
+first dim is important, but for the single sequence case just 1
+"""
+seq = np.zeros((1, dataobj.sequence_len_max, my_tlrnn.cov_num), dtype='int32')
+seq[0, :len(single_seq[:,0]), :] = single_seq[:, :]
 
 """
-generator model: draws samples from dataobj automatically
-define test_set manually from test set above for re-identification evaluation on hold-out
+translate the sequence into embedding vector with the trained tl_rnn model
+model requires list of features
+single_embedd is your embedding vector
 """
-my_tlrnn.train_generator(run_name=run_name, alpha=alpha, test_set=dataobj_test.triplet_tensor)
+single_embedd = my_tlrnn.model_pred.predict([seq[:, :, (i):(i+1)] for i in list(range(my_tlrnn.cov_num))])
 
