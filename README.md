@@ -1,4 +1,5 @@
 # tl_rnn
+
 TL-RNN model: Triplet Loss Recurrent Neural Network
 
 Copyright (C) Stefan Vamosi - All Rights Reserved
@@ -28,7 +29,7 @@ The triplet loss is based on the idea, that similarity should be learned from co
 <figure><img src="images/Sample_Draw_runningexample.png"><figcaption>Triplet comparison: Draw two sequences from the same user and a sequence from a different user. Taken from (Vamosi, Reutterer, Platzer)</figcaption></figure>
 
 
-**********************************************************MODEL ARCHITECTURE********************************************************************
+**MODEL ARCHITECTURE**
 
 The model consists of an Embedding layer, an LSTM layer trained on a triplet loss function:
 
@@ -45,77 +46,46 @@ However, the Embedding layer is important to reduce the input vector from a one-
 The model can be used to re-identify, embedd or cluster all sorts of sequential data, like behavioral event data (shopping paths, browsing behavior, geographic paths, etc.).
 
 
-*****************************************************TRAINING AND PARAMETERIZATION****************************************************************
+**TRAINING AND PARAMETERIZATION**
 
 The model has to be trained on a training data-set that consists of sequential data from individuals. For each user several sequences should be available, but not necessarily for all of them. 
 
 Most of the parameters for training and inference is parameterized in the *config.py*:
 
+*OPTIMIZER*: Defines the optimizer (usually Adam) and the learning rate [STRING]
 
-OPTIMIZER: Defines the optimizer (usually Adam) and the learning rate
+*EPOCHS*: Defines the maximum number of epochs trained. If validation loss does not mimprove for patience -> then stop training before. [INT]
 
-EPOCHS: Defines the maximum number of epochs trained. If validation loss does not mimprove for patience -> then stop training before.
+*SEQUENCE_LEN_MAX*: Maximal sequence length to encode. Longer sequences available will be cut-off either from the first or the last actions depending on . [INT]
 
-SEQUENCE_LEN_MAX: Maximal sequence length to encode. Longer sequences available will be cut-off either from the first or the last actions depending on 
+*TAKE_LAST_ACTIONS*: If TAKE_LAST_ACTIONS = True -> take the SEQUENCE_LEN_MAX last observations and throw away the first observations. [BOOL]
 
-TAKE_LAST_ACTIONS: If TAKE_LAST_ACTIONS = True -> take the SEQUENCE_LEN_MAX last observations and throw away the first observations. Other way around otherwise.
+*PATIENCE*: Patience defines the number of epochs that have to improve val-loss before early stopping is taking place [INT] 
 
-PATIENCE: patience defines the number of epochs that have to improve val-loss before early stopping is taking place 
+*BATCHES_PER_USER*: Defines how many triplets are sampled per user (proper anchor user) [INT]
 
+*BATCH_SIZE* = 64: Defines how many samples (triplets) are considered for one back-propagation calculation [INT]
 
-"""
-batches_per_user defines how many batches of size batch_size should be sampled per user
-batch_size defines how many samples (triplets) are considered for one back-propagation calculation
-This means, at least batch_size samples are considered per user (batches_per_user = 1)
-"""
-BATCHES_PER_USER: Defines how many samples (triplets) are considered for one back-propagation calculation
-BATCH_SIZE = 64
+*MAX_CARDINALITY*: Maximal cardinality for a feature (covariate), should be limited to hardware/model size. Consider that very rare signals do not play a big role [INT]
 
+*VALID_SPLIT*: How much of the training data should be used for epoch validation (early stopping) [REAL]
 
-"""
-if a sequence is longer than SEQUENCE_LEN_MAX, this setting defines what to do:
-if TAKE_LAST_ACTIONS = True -> take the SEQUENCE_LEN_MAX last observations and throw away the first ones
-if TAKE_LAST_ACTIONS = False [default] -> take the first observations and throw away the last ones
-"""
-TAKE_LAST_ACTIONS = False
+*MODEL_PATH*: File path to the trained models / model weights [STRING]
 
+*TENSORBOARD_PATH*: File path to the tensorboard files [STRING]
 
-"""
-max_cardinality is a cap for the maximal cardinality that for each feature is used
-should be limited in certain projects to limit the model size
-consider that super rare signals do not contribute to a comparative loss anyways, as they are so rare
-"""
-MAX_CARDINALITY = 100000
+*COVARIATES_ALL*: Provide column names to consider as features (covariates) [LIST OF STRINGS]
 
+*COVARIATES_TO_TRANSLATE*: Provide column names that are not integer encoded -> will provide rank-based encoding for these columns. [LIST OF STRINGS]
 
-"""
-if using validation error supervision, this valid_split variable defines
-how much of the original data are not used for training but for validation
-"""
-VALID_SPLIT = 0.05
+Some parameters have to be provided in the run.py or run.ipynb:
 
+*alpha*: seperation (push-pull) strength between anchor-positive and anchor-negative distances. Start with 1.0 and increase until you are happy -> Bias-Variance Tradeoff. [REAL]
 
-""" basic models path data """
-MODEL_PATH = "./logs/"
-TENSORBOARD_PATH = "tensorboard/"
+Constructor for dataprep class requires two parameters (beside the dataframe):
 
-
-"""
-define in the list all column names you want to use for this project
-consider that all these columns are used for triplet comparison learning
-"""
-COVARIATES_ALL = ["eventData_1", "eventData_2", "eventData_3"]
-
-
-"""
-define covariates_to_translate into numerical (integer) categories, 
-for example text strings, etc.
-do this by rank-based encoding, as this is transparent to see the rarity of signals immediately
-ATTENTION: ALL VARIABLES ARE ENCODED CATEGORICAL
-"""
-COVARIATES_TO_TRANSLATE = ["eventData_1"]
-
-
+*user_ID*: Name of the user_ID column in the dataframe. [STRING]
+*sequence_ID*: Name of the sequence_ID column to form sequences. [STRING]
 
 There, the static hyperparameters of the model are set (Not the alpha value that defines the push-pull relation of the triplet loss. This has to be tuned during training). Each user that has at least two existing sequences is used BATCHES_PER_USER x BATCH_SIZE times as an anchor user. In each iteration, a negative sample from another user is drawn randomly to build the triplet. All users are canditates as negatives.
 
