@@ -9,12 +9,12 @@ Proprietary and confidential
 
 Written by Stefan Vamosi <stefan@vamosi.org>, September 2021.
 
-**LITERATURE REFERENCE
+**LITERATURE REFERENCE**
 
 Results generated with this model was recently published by: Stefan Vamosi, Thomas Reutterer and Michael Platzer; A deep recurrent neural network approach to learn sequence similarities for user-identification; Decision Support Systems; https://doi.org/10.1016/j.dss.2021.113718
 
 
-**ABOUT TL-RNN
+**ABOUT TL-RNN**
 
 The TL-RNN code package represents a generic deep neural-network-based framework for quantifying the similarity of ordered sequences in event histories. It combines an LSTM network layer with a triplet loss cost function used for network training. It yields an embedding space that serves as a similarity metric for complex sequential data, can handle multivariate sequential data and incorporate covariates. In this embedding space not only distances between sequences can be measured, but also structural approaches, like clusters could be applied.
 
